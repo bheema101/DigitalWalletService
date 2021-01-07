@@ -43,18 +43,7 @@ public class S3FileDownlLoad implements FileDownload {
 	@Value("${bucketName}")
 	private String bucketName;
 	
-	public byte[] downloadimage() throws IOException {
-		S3Object s3Object = s3client.getObject(bucketName, "LATE BIRTH.pdf");
-		S3ObjectInputStream inputStream = s3Object.getObjectContent();
-		
-		//inputStream.
-		File file = new File("LATE BIRTH.pdf");
-		//file.
-		byte[] byteArray = IOUtils.toByteArray(inputStream);
-		OutputStream os = new FileOutputStream(file);
-		os.write(byteArray);
-		return byteArray;
-	}
+	
 	
 	public ResponseEntity<Resource> download(String fileName) throws IOException {
 		S3Object s3Object = s3client.getObject("digitalwallet", fileName);
@@ -82,49 +71,6 @@ public class S3FileDownlLoad implements FileDownload {
 	}
 	
 	
-	public ResponseEntity<ByteArrayResource> downloadfile() throws IOException {
-		 // Get a range of bytes from an object and print the bytes.
-		S3Object fullObject = null, objectPortion = null, headerOverrideObject = null;
-        // Get an entire object, overriding the specified response headers, and print the object's content.
-        ResponseHeaderOverrides headerOverrides = new ResponseHeaderOverrides()
-                .withCacheControl("No-cache")
-                .withContentDisposition("attachment; filename=LATE BIRTH.pdf");
-        GetObjectRequest getObjectRequestHeaderOverride = new GetObjectRequest(bucketName, "LATE BIRTH.pdf")
-                .withResponseHeaders(headerOverrides);
-        headerOverrideObject = s3client.getObject(getObjectRequestHeaderOverride);
-        byte[] data = IOUtils.toByteArray(headerOverrideObject.getObjectContent());
-        final ByteArrayResource resource = new ByteArrayResource(data);
-        
-       
-        
-        
-        
-        
-        return ResponseEntity
-                .ok()
-                .contentLength(data.length)
-                .header("Content-type", "application/octet-stream")
-                .header("Content-disposition", "attachment; filename=\"" + "LATE BIRTH.pdf" + "\"")
-                .body(resource);
-        	
-
-	}
 	
-	
-	public InputStream downloadimage(String fileName) throws IOException {
-		S3Object s3Object = s3client.getObject(bucketName, fileName);
-		S3ObjectInputStream inputStream = s3Object.getObjectContent();
-		
-		//inputStream.
-		//File file = new File(fileName);
-		
-		//file.
-		//byte[] byteArray = IOUtils.toByteArray(inputStream);
-		//InputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
-		/*OutputStream os = new FileOutputStream(file);
-		os.write(byteArray);*/
-		return inputStream;
-	}
-
 
 }

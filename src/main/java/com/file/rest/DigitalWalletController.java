@@ -106,31 +106,10 @@ public class DigitalWalletController {
 				HttpStatus.OK);
 	}
 
-	@RequestMapping("/download")
-	public byte[] downloadimage()  {
-		byte[] data = null;
-		try {
-			data =fileDownloadServie.downloadimage();
-		} catch (IOException e) {
-			LOGGER.error("Exception occured while downloadingimage :" ,e);
-		}
+	
+	
+	
 		
-		return data;
-		
-	}
-	
-	
-	@RequestMapping("/download2")
-	public ResponseEntity<Resource> download() {
-		ResponseEntity<Resource> resorce = null;
-		try {
-			resorce = fileDownloadServie.download("");
-		} catch (IOException e) {
-			LOGGER.error("Exception occured while downloadingimage :" ,e);
-		}
-		return resorce;
-	}
-	
 	@RequestMapping("/getAllFiles")
 	public List<String> getallFilesNames() {
 		 List<String> fileNames = new ArrayList<String>();
@@ -145,18 +124,13 @@ public class DigitalWalletController {
 	}
 	
 	
-	
-	@RequestMapping("/download3")
-	public ResponseEntity<ByteArrayResource> downloadfile()  {
-		ResponseEntity<ByteArrayResource> downloadfile = null;
-		try {
-			downloadfile = fileDownloadServie.downloadfile();
-		} catch (IOException e) {
-			LOGGER.error("Exception occured while downloadingimage :" ,e);
-		}
+	@RequestMapping("/fileResource")
+	public ResponseEntity<Resource>  downloadPDFResource2(HttpServletRequest request2, HttpServletResponse response,
+			@RequestParam(name = "fileName") String fileName) throws IOException {
 		
-		return downloadfile;
+		return fileDownloadServie.download(fileName);		
 	}
+	
 	
 	@RequestMapping(value = "/hello")
 	public String Hello() {
@@ -170,41 +144,7 @@ public class DigitalWalletController {
 	}
 	
 	
-	@RequestMapping("/file")
-	public void downloadPDFResource(HttpServletRequest request2, HttpServletResponse response,
-			@RequestParam(name = "fileName") String fileName) throws IOException {
 		
-		
-		
-		
-		
-		
-
-		File file = new File("" + fileName);
-		long length1 = file.length();
-			//get the mimetype
-			String mimeType = URLConnection.guessContentTypeFromName(file.getName());
-			if (mimeType == null) {
-				//unknown mimetype so set the mimetype to application/octet-stream
-				mimeType = "application/octet-stream";
-			}
-			response.setContentType(mimeType);
-			response.setHeader("Content-Disposition", String.format("attachment; filename=\"" + file.getName() + "\""));
-			response.setContentLength((int) file.length());
-			InputStream downloadimage = fileDownloadServie.downloadimage(fileName);
-			
-			byte[] byteArray = IOUtils.toByteArray(downloadimage);
-			InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(byteArray));
-			//FileCopyUtils.copy(inputStream, response.getOutputStream());
-			ServletOutputStream outputStream = response.getOutputStream();
-			
-			//while(byteArray[0] !=-1) {
-				outputStream.write(byteArray);
-			//}
-			
-	}
-	
-	
 	@RequestMapping("/readfromlocal")
 	public void downloadSorcefromFileSustem(HttpServletRequest request2, HttpServletResponse response,
 			@RequestParam(name = "fileName") String fileName) throws IOException {
@@ -228,12 +168,7 @@ public class DigitalWalletController {
 	}
 	
 	
-	@RequestMapping("/fileResource")
-	public ResponseEntity<Resource>  downloadPDFResource2(HttpServletRequest request2, HttpServletResponse response,
-			@RequestParam(name = "fileName") String fileName) throws IOException {
-		
-		return fileDownloadServie.download(fileName);		
-	}
+	
 		
 	
 
