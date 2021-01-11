@@ -86,7 +86,6 @@ public class DigitalWalletController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DigitalWalletController.class);
 	
-	@CrossOrigin("http://localhost:3000")
 	@RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT }, consumes = {
 			"multipart/form-data" }, value = "/upload")
 	@ResponseBody
@@ -112,7 +111,6 @@ public class DigitalWalletController {
 	
 	
 	
-	@CrossOrigin("http://localhost:3000")	
 	@RequestMapping("/getAllFiles")
 	public List<String> getallFilesNames() {
 		 List<String> fileNames = new ArrayList<String>();
@@ -126,7 +124,6 @@ public class DigitalWalletController {
 			return fileNames;
 	}
 	
-	@CrossOrigin("http://localhost:3000")
 	@RequestMapping("/fileResource")
 	
 	public ResponseEntity<Resource>  downloadFileSource(HttpServletRequest request2, HttpServletResponse response,
@@ -144,7 +141,6 @@ public class DigitalWalletController {
 	
 	
 	
-	@CrossOrigin("http://localhost:3000")	
 	@RequestMapping("/readfromlocal")
 	public void downloadSorcefromFileSustem(HttpServletRequest request2, HttpServletResponse response,
 			@RequestParam(name = "fileName") String fileName) throws IOException {
@@ -175,7 +171,6 @@ public class DigitalWalletController {
 	}
 	
 	
-	@CrossOrigin("http://localhost:3000")
 	@RequestMapping(value = "/hello")
 	public String Hello() {
 		LOGGER.info("file {} upload started...");
