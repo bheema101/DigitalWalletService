@@ -35,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,10 +56,12 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
+import com.file.model.Fileinfo;
 import com.file.service.download.FileDownload;
 import com.file.service.upload.FileUpload;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class DigitalWalletController {
 
 
@@ -83,7 +86,7 @@ public class DigitalWalletController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DigitalWalletController.class);
 	
-
+	@CrossOrigin("http://localhost:3000")
 	@RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT }, consumes = {
 			"multipart/form-data" }, value = "/upload")
 	@ResponseBody
@@ -109,7 +112,7 @@ public class DigitalWalletController {
 	
 	
 	
-		
+	@CrossOrigin("http://localhost:3000")	
 	@RequestMapping("/getAllFiles")
 	public List<String> getallFilesNames() {
 		 List<String> fileNames = new ArrayList<String>();
@@ -123,28 +126,25 @@ public class DigitalWalletController {
 			return fileNames;
 	}
 	
-	
+	@CrossOrigin("http://localhost:3000")
 	@RequestMapping("/fileResource")
-	public ResponseEntity<Resource>  downloadPDFResource2(HttpServletRequest request2, HttpServletResponse response,
-			@RequestParam(name = "fileName") String fileName) throws IOException {
-		
-		return fileDownloadServie.download(fileName);		
+	
+	public ResponseEntity<Resource>  downloadFileSource(HttpServletRequest request2, HttpServletResponse response,
+			@RequestParam(name = "fileName") String fileName)  {
+		ResponseEntity<Resource> resoponse = null;
+		try {
+			resoponse =fileDownloadServie.download(fileName);
+		}catch (Exception e) {
+			LOGGER.error("Excption occured while file downloading from s3:",e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return 	resoponse;	
 	}
 	
 	
-	@RequestMapping(value = "/hello")
-	public String Hello() {
-		LOGGER.info("file {} upload started...");
-		/*List<Bucket> buckets = s3client.listBuckets();
-		for (Bucket bucket : buckets) {
-			System.out.println(bucket.getName());
-		}*/
-		return "HI";
-
-	}
 	
 	
-		
+	@CrossOrigin("http://localhost:3000")	
 	@RequestMapping("/readfromlocal")
 	public void downloadSorcefromFileSustem(HttpServletRequest request2, HttpServletResponse response,
 			@RequestParam(name = "fileName") String fileName) throws IOException {
@@ -165,10 +165,27 @@ public class DigitalWalletController {
 		FileCopyUtils.copy(inputStream, response.getOutputStream());
 		}
 		
+		
 	}
 	
 	
+	@RequestMapping("getdynomoDB")
+	public  ResponseEntity<Fileinfo> findBy( @RequestParam("fileName")String fileName) {
+		return ResponseEntity.ok(fileuploadservice.findBy(fileName));
+	}
 	
+	
+	@CrossOrigin("http://localhost:3000")
+	@RequestMapping(value = "/hello")
+	public String Hello() {
+		LOGGER.info("file {} upload started...");
+		/*List<Bucket> buckets = s3client.listBuckets();
+		for (Bucket bucket : buckets) {
+			System.out.println(bucket.getName());
+		}*/
+		return "HI";
+
+	}
 		
 	
 

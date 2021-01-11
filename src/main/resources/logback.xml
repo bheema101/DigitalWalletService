@@ -1,5 +1,5 @@
 <configuration>
-    <property name="LOG_FILE" value="${LOG_FILE:-logs/dog.log}" />
+    <property name="LOG_FILE" value="${LOG_FILE:-logs/log.log}" />
     <property name="LOG_PATTERN" value="${LOG_PATTERN:-%d{yyyy-MM-dd HH:mm:ss} [%X{user}] [%thread] %-1level %logger{36} - %msg%n}" />
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -26,7 +26,7 @@
     <!--There are issues with serializing Spring MVC errors when we work with ELN XML media type - it silently cannot
      serialize it. This allows at least to show the error in logs (as a temp solution).-->
     <logger name="org.apache.catalina.startup.DigesterFactory" level="WARN" />
-    <logger name="com.hotel.booking" level="INFO" />
+    <logger name="com.file" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

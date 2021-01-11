@@ -12,6 +12,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -33,6 +35,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
 import com.file.service.download.FileDownload;
+import com.file.service.upload.impl.S3FileUpload;
 
 @Service
 public class S3FileDownlLoad implements FileDownload {
@@ -43,6 +46,7 @@ public class S3FileDownlLoad implements FileDownload {
 	@Value("${bucketName}")
 	private String bucketName;
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(S3FileDownlLoad.class);
 	
 	
 	public ResponseEntity<Resource> download(String fileName) throws IOException {
@@ -56,18 +60,24 @@ public class S3FileDownlLoad implements FileDownload {
 			mimeType = "application/octet-stream";
 		}
 		
+		HttpHeaders headers = createHttpHeaders(fileName, mimeType);
+        ByteArrayResource resource = new ByteArrayResource(byteArray,fileName);
+        
+        return ResponseEntity.ok()
+	            .headers(headers)
+	            .contentLength(resource.contentLength())
+	            .body(resource);
+	}
+
+
+	private HttpHeaders createHttpHeaders(String fileName, String mimeType) {
 		HttpHeaders headers = new HttpHeaders();
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
         headers.add("Content-type",mimeType );
         headers.add("Content-disposition", String.format("attachment; filename=\"" + fileName + "\""));
-        ByteArrayResource resource2 = new ByteArrayResource(byteArray,fileName);
-        
-        return ResponseEntity.ok()
-	            .headers(headers)
-	            .contentLength(resource2.contentLength())
-	            .body(resource2);
+		return headers;
 	}
 	
 	
