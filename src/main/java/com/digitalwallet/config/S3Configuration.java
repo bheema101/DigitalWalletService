@@ -1,4 +1,4 @@
-package com.file.config;
+package com.digitalwallet.config;
 
 import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
 import org.springframework.beans.factory.annotation.Value;
