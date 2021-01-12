@@ -17,7 +17,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 @Configuration
-@EnableDynamoDBRepositories(basePackages = "com.file.service.upload.impl")
+@EnableDynamoDBRepositories(basePackages = "com.digitalwallet.service.upload.impl")
 
 public class S3Configuration {
 
