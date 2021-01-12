@@ -7,12 +7,13 @@ class DragNDrop extends Component {
   state = {
     files: [],
   };
+  ngrok_url = "http://ff038484f781.ngrok.io";
   componentDidMount() {
     //getAllFiles
     console.log("Mounted");
     axios({
       method: "get",
-      url: "http://ff038484f781.ngrok.io/getAllFiles",
+      url: `${this.ngrok_url}/getAllFiles`,
     })
       .then((response) => {
         this.setState((this.state.files = [...response.data]));
@@ -25,7 +26,7 @@ class DragNDrop extends Component {
     formdata.append("file", files[0]);
     axios({
       method: "post",
-      url: "http://ff038484f781.ngrok.io/upload",
+      url: `${this.ngrok_url}/upload`,
       data: formdata,
       headers: { "Content-Type": "multipart/form-data" },
     })
@@ -33,23 +34,13 @@ class DragNDrop extends Component {
         console.log("File uploaded successfully");
         axios({
           method: "get",
-          url: "http://ff038484f781.ngrok.io/getAllFiles",
+          url: `${this.ngrok_url}/getAllFiles`,
         })
           .then((response) => {
             this.setState((this.state.files = [...response.data]));
           })
           .catch((err) => console.log(err));
       })
-      .catch((err) => console.log(err));
-  };
-
-  onDownload = (file) => {
-    console.log(file);
-    axios({
-      method: "post",
-      url: `http://ff038484f781.ngrok.io/fileResource?fileName=${file}`,
-    })
-      .then(() => console.log("File downloaded"))
       .catch((err) => console.log(err));
   };
 
@@ -63,7 +54,7 @@ class DragNDrop extends Component {
           >
             {this.state.files.length > 0
               ? this.state.files.map((file) => (
-                  <a href={`http://ff038484f781.ngrok.io/fileResource?fileName=${file}` } key={file}>{file}</a>
+                  <a href={`${this.ngrok_url}/fileResource?fileName=${file}` } key={file}>{file}</a>
                 ))
               : `Drop some files here!`}
           </FileDrop>
