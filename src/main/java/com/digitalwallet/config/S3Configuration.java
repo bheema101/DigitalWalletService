@@ -1,4 +1,4 @@
-package com.file.config;
+package com.digitalwallet.config;
 
 import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,11 +13,10 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 @Configuration
-@EnableDynamoDBRepositories(basePackages = "com.file.service.upload.impl")
+@EnableDynamoDBRepositories(basePackages = "com.digitalwallet.service.upload.impl")
 
 public class S3Configuration {
 

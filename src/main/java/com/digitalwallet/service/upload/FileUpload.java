@@ -1,8 +1,8 @@
-package com.file.service.upload;
+package com.digitalwallet.service.upload;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.file.model.Fileinfo;
+import com.digitalwallet.model.Fileinfo;
 
 public interface FileUpload {
 	public void uploadfile(MultipartFile file) throws Exception ;

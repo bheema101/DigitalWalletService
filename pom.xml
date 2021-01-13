@@ -11,8 +11,8 @@
 	<groupId>com.file</groupId>
 	<artifactId>DigitalWalletService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>fileupload</name>
-	<description>fileupload</description>
+	<name>digital-service</name>
+	<description>digital-service</description>
 
 	<properties>
 		<java.version>1.8</java.version>

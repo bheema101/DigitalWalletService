@@ -1,4 +1,4 @@
-package com.file.service.download;
+package com.digitalwallet.service.download;
 
 import java.io.IOException;
 import java.io.InputStream;

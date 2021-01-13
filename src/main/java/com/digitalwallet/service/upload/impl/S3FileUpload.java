@@ -1,11 +1,9 @@
-package com.file.service.upload.impl;
+package com.digitalwallet.service.upload.impl;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,23 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemCollection;
-import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.file.model.Fileinfo;
-import com.file.rest.DigitalWalletController;
-import com.file.service.upload.FileUpload;
+import com.digitalwallet.model.Fileinfo;
+import com.digitalwallet.service.upload.FileUpload;
 @Service
 public class S3FileUpload  implements FileUpload {
 	
