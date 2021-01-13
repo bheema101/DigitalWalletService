@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,11 +34,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.digitalwallet.model.Fileinfo;
+import com.digitalwallet.model.FormWrapper;
 import com.digitalwallet.service.download.FileDownload;
+import com.digitalwallet.service.download.impl.Queryinvoker;
 import com.digitalwallet.service.upload.FileUpload;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class DigitalWalletController {
 
 
@@ -53,6 +56,8 @@ public class DigitalWalletController {
 	
 	@Autowired
 	AmazonS3 s3client;
+	@Autowired
+	Queryinvoker moviscan;
 	
 	@Value("${bucketName}")
 	private String bucketName;
@@ -150,20 +155,42 @@ public class DigitalWalletController {
 	
 	
 	@RequestMapping(value = "/hello")
-	public String Hello() throws Exception {
+	public List<Fileinfo>  Hello() throws Exception {
 		LOGGER.info("file {} upload started...");
 		/*List<Bucket> buckets = s3client.listBuckets();
 		for (Bucket bucket : buckets) {
 			System.out.println(bucket.getName());
 			
 		}*/
+		Fileinfo findBy = fileuploadservice.findBy("a2aa7874-6be8-47fa-a06f-bb0169437ee5");
+		Fileinfo fileinfo = new Fileinfo();
+		List<Fileinfo>  fileinfosbytuid = moviscan.getFileinfosbytuid(fileinfo);
 		
-		
-		return "HI";
+		return fileinfosbytuid;
 
 	}
-		
+	
+	
+	@RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT }, consumes = {
+	"multipart/form-data"}, value = "/uploadfilewithdata")
+	@ResponseBody
+	public ResponseEntity<?> uploadFilewithData(@ModelAttribute FormWrapper formWrapper) { 
+			LOGGER.info("formwrapper data"+formWrapper);
+			MultipartFile file = formWrapper.getFile();
+			try {
+				
+				fileuploadservice.uploadfile(file,formWrapper);
+			} catch (Exception e) {
+				LOGGER.error("Exception occred while uploading file {} ",file.getOriginalFilename(),e);
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			LOGGER.info("file {} upload Ended...",file.getOriginalFilename());
+			return new ResponseEntity("Successfully uploaded - " + file.getOriginalFilename(), new HttpHeaders(),
+					HttpStatus.OK);
+		}
+}
+
 	
 
 	
-}
+
