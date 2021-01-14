@@ -7,8 +7,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
@@ -53,17 +55,58 @@ public class S3Configuration {
     private String amazonAWSSecretKey;
 
     @Bean
-    public AmazonDynamoDB amazonDynamoDB() {
-        AmazonDynamoDB amazonDynamoDB 
-          = new AmazonDynamoDBClient(amazonAWSCredentials());
-        
-        if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
-            amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
-        }
-        
-        return amazonDynamoDB;
-    }
+	public AmazonDynamoDB amazonDynamoDB() {
+		//for aws webservice
+		/*AWSCredentials credentials = new BasicAWSCredentials(
+				accessKey, 
+				storAccessKey
+				);
+	    AmazonDynamoDB amazonDynamoDB 
+	      = new AmazonDynamoDBClient(credentials);
+	    
+	    if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
+	        amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
+	    }
+	    
+	    amazonDynamoDB.setRegion(Region.getRegion(Regions.AP_SOUTH_1));*/
+	    
+	   /* AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(getAWSCredentialsProvider())
+	            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:1234", "us-east-1"))
+	            .build();
+	    
+	    return client;*/
+    	
+    	AmazonDynamoDB client = new AmazonDynamoDBClient(new BasicAWSCredentials(
+    	          amazonAWSAccessKey, amazonAWSSecretKey));
+	    //.standard().withCredentials()
+	    if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
+	    	client.setEndpoint(amazonDynamoDBEndpoint);
+	    }
+	   client.setRegion(Region.getRegion(Regions.US_EAST_1));
+	    
+	    return client;
+	}
 
+    
+    
+    public AWSCredentialsProvider getAWSCredentialsProvider() {
+    	return new AWSCredentialsProvider() {
+
+			@Override
+			public AWSCredentials getCredentials() {
+				// TODO Auto-generated method stub
+				return amazonAWSCredentials();
+			}
+
+			@Override
+			public void refresh() {
+				// TODO Auto-generated method stub
+				
+			}
+    		
+    	};
+    }
+    
     @Bean
     public AWSCredentials amazonAWSCredentials() {
         return new BasicAWSCredentials(

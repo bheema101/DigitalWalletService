@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
@@ -99,12 +100,19 @@ public class S3FileUpload  implements FileUpload {
 	
 	
 	public String saveinDynomoDB(Fileinfo fileInfo) {
-		boolean createTable = createTable();
-		if(createTable) {
+	//	boolean createTable = createTable();
+		
+	//	if(createTable) {
 			LOGGER.info("TABLE WAS CREATED");
-		}
-		Fileinfo file = fileRepository.save(fileInfo);
-		return file.getId();
+	//	}
+	//	Fileinfo file = fileRepository.save(fileInfo);
+			DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
+			dynamoDBMapper = new  DynamoDBMapper(amazonDynamoDB);
+	       // Table table = dynamoDB.getTable("Fileinfo");
+	       // Fileinfo fileinfo = new Fileinfo("TU101","demo.txt","PN101","TRIP101",LocalDateTime.now());
+	        dynamoDBMapper.save(fileInfo);
+	      //  amazonDynamoDB.putItem(putItemRequest);
+		return fileInfo.getId();
 		
 	}
 
@@ -129,27 +137,27 @@ public class S3FileUpload  implements FileUpload {
 		tableRequest.getKeySchema().addAll(keySchema);
 		GlobalSecondaryIndex globalSecondaryIndex = new GlobalSecondaryIndex();
 		KeySchemaElement keySchemaElement = new KeySchemaElement("tuid",KeyType.HASH);
-		//KeySchemaElement keySchemaElement2 = new KeySchemaElement("pnr",KeyType.RANGE);
+		KeySchemaElement keySchemaElement2 = new KeySchemaElement("pnr",KeyType.RANGE);
 		globalSecondaryIndex.setIndexName("tuid-pnr");
 		Projection projection = new Projection();
 		
-		projection.setProjectionType(ProjectionType.KEYS_ONLY);
-		//projection.setNonKeyAttributes(Arrays.asList("tuid"));
+		projection.setProjectionType(ProjectionType.INCLUDE);
+		projection.setNonKeyAttributes(Arrays.asList("tuid","pnr"));
 		globalSecondaryIndex.setProjection(projection);
 		
 		
 		
 		
 		
-		globalSecondaryIndex.setKeySchema(Arrays.asList(keySchemaElement));
+		globalSecondaryIndex.setKeySchema(Arrays.asList(keySchemaElement,keySchemaElement2));
 		tableRequest.setGlobalSecondaryIndexes(Arrays.asList(globalSecondaryIndex));
 		globalSecondaryIndex.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
 		DeleteTableRequest deleteTableRequest = dynamoDBMapper.generateDeleteTableRequest(Fileinfo.class);
 
 		tableRequest.setProvisionedThroughput(
 		        new ProvisionedThroughput(1L, 1L));
-	//	return TableUtils.deleteTableIfExists(amazonDynamoDB, deleteTableRequest);
-		return TableUtils.createTableIfNotExists(amazonDynamoDB, tableRequest);
+		return TableUtils.deleteTableIfExists(amazonDynamoDB, deleteTableRequest);
+	//	return TableUtils.createTableIfNotExists(amazonDynamoDB, tableRequest);
 	}
 	
 	

@@ -21,7 +21,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,7 +39,7 @@ import com.digitalwallet.service.download.impl.Queryinvoker;
 import com.digitalwallet.service.upload.FileUpload;
 
 @RestController
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class DigitalWalletController {
 
 
@@ -154,19 +153,19 @@ public class DigitalWalletController {
 	}
 	
 	
-	@RequestMapping(value = "/hello")
-	public List<Fileinfo>  Hello() throws Exception {
+	@RequestMapping(value = "/query")
+	public List<Fileinfo>  hello() throws Exception {
 		LOGGER.info("file {} upload started...");
 		/*List<Bucket> buckets = s3client.listBuckets();
 		for (Bucket bucket : buckets) {
 			System.out.println(bucket.getName());
 			
 		}*/
-		Fileinfo findBy = fileuploadservice.findBy("a2aa7874-6be8-47fa-a06f-bb0169437ee5");
-		Fileinfo fileinfo = new Fileinfo();
-		List<Fileinfo>  fileinfosbytuid = moviscan.getFileinfosbytuid(fileinfo);
-		
-		return fileinfosbytuid;
+//		Fileinfo findBy = fileuploadservice.findBy("a2aa7874-6be8-47fa-a06f-bb0169437ee5");
+//		Fileinfo fileinfo = new Fileinfo();
+//		List<Fileinfo>  fileinfosbytuid = moviscan.getFileinfosbytuid(fileinfo);
+		moviscan.insertData();
+		return new ArrayList<>();
 
 	}
 	
@@ -188,8 +187,17 @@ public class DigitalWalletController {
 			return new ResponseEntity("Successfully uploaded - " + file.getOriginalFilename(), new HttpHeaders(),
 					HttpStatus.OK);
 		}
+	
+	@RequestMapping(value = "/hello")
+	public String  reverseproxy() throws Exception {
+		LOGGER.info("file {} upload started...");
+		
+		return "welcome to dws";
+	
 }
 
+	
+}
 	
 
 	

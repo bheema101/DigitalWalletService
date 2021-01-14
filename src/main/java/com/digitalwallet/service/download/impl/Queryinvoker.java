@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
@@ -47,6 +49,7 @@ public class Queryinvoker {
 	
 	@Autowired
 	AmazonDynamoDB client;
+	
     public  void queryTable() throws Exception {
 
     	DynamoDB dynamoDB = new DynamoDB(client);
@@ -196,13 +199,21 @@ public class Queryinvoker {
 			        Index index = table.getIndex("tuid-pnr");
 	
 			        
-			        QuerySpec spec = new QuerySpec()
-			        	 //   .withKeyConditionExpression("tuid = :v_date and begins_with(pnr,:v_precip)")
+			      /*  QuerySpec spec = new QuerySpec()
+			        	 //   .withKeyConditionExpression("tuid = :tuidValue and pnr=:pnrValue")
 			        	   .withKeyConditionExpression("tuid=:tuidValue")
 			        		.withValueMap(new ValueMap()
 			        	    .withString(":tuidValue","TU104"));
-			        	  //  .withString(":v_precip","YX104"));
-
+			        	  //  .withString(":pnrValue","YX104"));
+*/
+			        
+			        
+			        QuerySpec spec = new QuerySpec()
+			        	    .withKeyConditionExpression("tuid = :tuidValue and begins_with(pnr,:pnrValue)")
+			        	 //  .withKeyConditionExpression("tuid=:tuidValue")
+			        		.withValueMap(new ValueMap()
+			        	    .withString(":tuidValue","TU104")
+			        	    .withString(":pnrValue","YX104"));
 			        System.out.println("Compilation errors");
 //		            spec.withKeyConditionExpression("Title = :v_title and begins_with(IssueId, :v_issue)")
 //		                .withValueMap(new ValueMap().withString(":v_title", "Compilation error").withString(":v_issue", "A-"));
@@ -211,7 +222,8 @@ public class Queryinvoker {
 			        ItemCollection<QueryOutcome> items = index.query(spec);
 
 			        if(!items.iterator().hasNext()) {
-			            return null;
+			        	System.out.println("empty");
+			           // return null;
 			        }else {
 			        	Iterator<Item> iter = items.iterator(); 
 			        	while (iter.hasNext()) {
@@ -219,8 +231,63 @@ public class Queryinvoker {
 			        	}
 			        }
 			     
-		     	
+			        
+			        Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
+			        attributeValues.put(":tuidValue", new AttributeValue().withS("TU104"));
+			        
+			        Map<String, String> attributeNames = new HashMap<String, String>();
+			        attributeNames.put("#key1", "tuid");
+			        
+			        DynamoDBQueryExpression<Fileinfo> queryExpression = new DynamoDBQueryExpression<Fileinfo>()
+			        	      .withIndexName("tuid-pnr")
+			        	      .withExpressionAttributeValues(attributeValues)
+			        	      .withExpressionAttributeNames(attributeNames)
+			        	      .withKeyConditionExpression("#key1 = :val1")
+			        	      .withConsistentRead(false);
+			        PaginatedQueryList<Fileinfo> query = mapper.query(Fileinfo.class, queryExpression);
+			        
+			        
+			        
+			        
 		    	return fileInfos;
 	     	
 	}
+    
+    
+    public void insertData() {
+    	
+    	
+    	 Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
+	      attributeValues.put(":tuidValue", new AttributeValue("TU101"));
+	      //attributeValues.put(":pnrValue", new AttributeValue().withS("YX104"));
+	        
+	      Map<String, String> attributeNames = new HashMap<String, String>();
+	      attributeNames.put("#key1", "tuid");
+	    //  attributeNames.put("#key2", "pnr");
+	        
+	    DynamoDBMapper mapper = new DynamoDBMapper(client);
+	    
+    	DynamoDBQueryExpression<Fileinfo> queryExpression = new DynamoDBQueryExpression<Fileinfo>()
+      	      .withIndexName("tuid-pnr-index")
+    	    //  .withIndexName("tuid-pnrall-index")
+      	     .withExpressionAttributeValues(attributeValues)
+      	     .withExpressionAttributeNames(attributeNames)
+      	      .withKeyConditionExpression("#key1 = :tuidValue")
+      	      .withConsistentRead(false); 
+    	PaginatedQueryList<Fileinfo> query = mapper.query(Fileinfo.class, queryExpression);
+    	
+    	for(Fileinfo fileinfo : query) {
+    		System.out.println(fileinfo);
+    	}
+
+    	DynamoDB dynamoDB = new DynamoDB(client);
+        //Table table = dynamoDB.getTable("Fileinfo");
+        //Fileinfo fileinfo = new Fileinfo("TU101","demo.txt","PN101","TRIP101",LocalDateTime.now());
+       
+     //   mapper.save(fileinfo);
+    	
+    }
+    
+    
+    
 }
