@@ -257,22 +257,33 @@ public class Queryinvoker {
     public void insertData() {
     	
     	
-    	 Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
-	      attributeValues.put(":tuidValue", new AttributeValue("TU101"));
-	      //attributeValues.put(":pnrValue", new AttributeValue().withS("YX104"));
+    	
+    	ScanRequest scanRequest = new ScanRequest()
+	     	    .withTableName("Fileinfo");
+	     	  // .withFilterExpression("tuid = tripidValue AND fileName = fileNameValue AND pnr = pnrValue")
+	     	  // .withFilterExpression("tuid = :tripidValue AND  pnr = :pnrValue")
+	     	   // .withFilterExpression("fileName = :fileNameValue")
+	     	 //   .withExpressionAttributeValues(expressionAttributeValues);
+	     	ScanResult result = client.scan(scanRequest);
+	     	DynamoDBMapper mapper = new DynamoDBMapper(client);
+	     	List<Fileinfo> fileInfos = mapper.marshallIntoObjects(Fileinfo.class, result.getItems());
+    	
+    	
+	      Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
+	      attributeValues.put(":tuidValue", new AttributeValue("\"TU101\""));
+	      attributeValues.put(":pnrValue", new AttributeValue().withS("\"PN101\""));
 	        
 	      Map<String, String> attributeNames = new HashMap<String, String>();
 	      attributeNames.put("#key1", "tuid");
-	    //  attributeNames.put("#key2", "pnr");
+	      attributeNames.put("#key2", "pnr");
 	        
-	    DynamoDBMapper mapper = new DynamoDBMapper(client);
 	    
     	DynamoDBQueryExpression<Fileinfo> queryExpression = new DynamoDBQueryExpression<Fileinfo>()
       	      .withIndexName("tuid-pnr-index")
     	    //  .withIndexName("tuid-pnrall-index")
       	     .withExpressionAttributeValues(attributeValues)
       	     .withExpressionAttributeNames(attributeNames)
-      	      .withKeyConditionExpression("#key1 = :tuidValue")
+      	      .withKeyConditionExpression("#key1 = :tuidValue and #key2 = :pnrValue")
       	      .withConsistentRead(false); 
     	PaginatedQueryList<Fileinfo> query = mapper.query(Fileinfo.class, queryExpression);
     	

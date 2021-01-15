@@ -30,8 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.digitalwallet.model.Fileinfo;
 import com.digitalwallet.model.FormWrapper;
 import com.digitalwallet.service.download.FileDownload;
@@ -94,16 +92,17 @@ public class DigitalWalletController {
 	
 	
 	@RequestMapping("/getAllFiles")
-	public List<String> getallFilesNames() {
+	public List<Fileinfo> getallFilesNames() {
 		 List<String> fileNames = new ArrayList<String>();
 	       
-	        
-	        ObjectListing listObjects = s3client.listObjects(bucketName);
+		 	
+	     /*   ObjectListing listObjects = s3client.listObjects(bucketName);
 	        List<S3ObjectSummary> objectSummaries = listObjects.getObjectSummaries();
 	        for(S3ObjectSummary os :objectSummaries) {
 	        	fileNames.add(os.getKey());
-	        }
-			return fileNames;
+	        }*/
+		 	
+			return fileuploadservice.getAllFiles();
 	}
 	
 	@RequestMapping("/fileResource")

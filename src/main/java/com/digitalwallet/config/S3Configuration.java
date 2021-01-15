@@ -10,7 +10,6 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
@@ -68,21 +67,23 @@ public class S3Configuration {
 	        amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
 	    }
 	    
-	    amazonDynamoDB.setRegion(Region.getRegion(Regions.AP_SOUTH_1));*/
+	    amazonDynamoDB.setRegion(Region.getRegion(Regions.AP_SOUTH_1));
 	    
-	   /* AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(getAWSCredentialsProvider())
+	    return amazonDynamoDB;
+	    */
+	  /*  AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(getAWSCredentialsProvider())
 	            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:1234", "us-east-1"))
 	            .build();
 	    
 	    return client;*/
     	
     	AmazonDynamoDB client = new AmazonDynamoDBClient(new BasicAWSCredentials(
-    	          amazonAWSAccessKey, amazonAWSSecretKey));
+    			"dummykey", "dummysecertkey"));
 	    //.standard().withCredentials()
 	    if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
 	    	client.setEndpoint(amazonDynamoDBEndpoint);
 	    }
-	   client.setRegion(Region.getRegion(Regions.US_EAST_1));
+	  // client.setRegion(Region.getRegion(Regions.US_EAST_1));
 	    
 	    return client;
 	}
