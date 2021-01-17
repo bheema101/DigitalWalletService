@@ -36,7 +36,7 @@ public class FileInfoCreateTable {
 	@Autowired
 	AmazonDynamoDB client;
 
- /* public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
 	//public void createTable() {
         AmazonDynamoDB client = createClinent();
 
@@ -44,11 +44,11 @@ public class FileInfoCreateTable {
         DynamoDB dynamoDB = new DynamoDB(client);
 
         String tableName = "Fileinfo";
-        deleteTable(tableName,client);
-      //  createTable(dynamoDB, tableName);
+     //   deleteTable(tableName,client);
+      createTable(dynamoDB, tableName);
 
     }
-*/
+
    
    public static void createTable(DynamoDB dynamoDB, String tableName) {
 	   
@@ -69,20 +69,20 @@ public static void createTable1(DynamoDB dynamoDB, String tableName) {
 		LOGGER.info("Attempting to create table : {} ",tableName);
 	    CreateTableRequest createTableRequest = new CreateTableRequest();
 	    createTableRequest.setTableName(tableName);
-	    createTableRequest.setKeySchema( Arrays.asList(new KeySchemaElement("id", KeyType.HASH),
-	    		                                       new KeySchemaElement("tuid", KeyType.RANGE)));
+	    createTableRequest.setKeySchema( Arrays.asList(new KeySchemaElement("id", KeyType.HASH)/*,
+	    		                                       new KeySchemaElement("tuid", KeyType.RANGE)*/));
 	    		                                       //new KeySchemaElement("fileName", KeyType.RANGE)));
 	    createTableRequest.setAttributeDefinitions(Arrays.asList(new AttributeDefinition("id", ScalarAttributeType.S),
 	            new AttributeDefinition("tuid", ScalarAttributeType.S),
 	           // new AttributeDefinition("tripid", ScalarAttributeType.S),
-	            new AttributeDefinition("pnr", ScalarAttributeType.S),
-	            new AttributeDefinition("fileName", ScalarAttributeType.S)));
+	            new AttributeDefinition("pnr", ScalarAttributeType.S)));
+	           // new AttributeDefinition().withAttributeName("fileNameS").withAttributeType("SS")));
 	          //  new AttributeDefinition("uploadedDateTime", ScalarAttributeType.S)));
 	    createTableRequest.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
 	    GlobalSecondaryIndex gsi = new GlobalSecondaryIndex();
 	    gsi.setKeySchema(Arrays.asList(new KeySchemaElement("tuid", KeyType.HASH),
 	    		                       new KeySchemaElement("pnr", KeyType.RANGE)));
-	    gsi.setProjection(new Projection().withProjectionType(ProjectionType.INCLUDE).withNonKeyAttributes(Arrays.asList("tripid","fileName","uploadedDateTime")));
+	    gsi.setProjection(new Projection().withProjectionType(ProjectionType.ALL));
 	    gsi.setIndexName("tuid-pnr-index");
 	    gsi.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
 	    createTableRequest.setGlobalSecondaryIndexes(Arrays.asList(gsi));

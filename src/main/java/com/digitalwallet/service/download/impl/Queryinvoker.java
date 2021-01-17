@@ -160,7 +160,7 @@ public class Queryinvoker {
 	     	List<Map<String,String>> listoffileswithids = new ArrayList<>();
 	     	for (Fileinfo fileInfo : fileInfos) {
 	     	  // System.out.println(fileInfo.getId());
-	     		filenameswithids.put(fileInfo.getId(), fileInfo.getFileName());
+	     	//	filenameswithids.put(fileInfo.getId(), fileInfo.getFileNames());
 	     		
 	     	}	
 	     	listoffileswithids.add(filenameswithids);
