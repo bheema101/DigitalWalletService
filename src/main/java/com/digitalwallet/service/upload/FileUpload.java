@@ -12,5 +12,5 @@ public interface FileUpload {
 	public void uploadfile(MultipartFile file,FormWrapper formWrapper) throws Exception ;
 	public  Fileinfo findBy(String fileName);
 	
-	public List<Fileinfo> getAllFiles();
+	public List<Fileinfo> getAllFiles(String pnr,String tuid);
 }

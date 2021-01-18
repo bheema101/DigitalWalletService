@@ -21,7 +21,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,9 +92,8 @@ public class DigitalWalletController {
 
 	
 	
-	
-	@RequestMapping("/getAllFiles")
-	public List<Fileinfo> getallFilesNames() {
+	@GetMapping("/getAllFiles/{pnr}/{tuid}")
+	public List<Fileinfo> getallFilesNames(@PathVariable String pnr,@PathVariable String tuid) {
 		 List<String> fileNames = new ArrayList<String>();
 	       
 		 	
@@ -102,7 +103,7 @@ public class DigitalWalletController {
 	        	fileNames.add(os.getKey());
 	        }*/
 		 	
-			return fileuploadservice.getAllFiles();
+			return fileuploadservice.getAllFiles(pnr,tuid);
 	}
 	
 	@RequestMapping("/fileResource")

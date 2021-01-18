@@ -1,6 +1,5 @@
 package com.digitalwallet.service.upload.impl;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
@@ -205,13 +203,13 @@ public class S3FileUpload  implements FileUpload {
 		String path = String.format("%s",bucketName);
 		try {
 			LOGGER.info("file uploaded into s3 started {} ",file.getOriginalFilename() );
-			s3client.putObject(path, fileId, file.getInputStream(), objectMetadata);
+			//s3client.putObject(path, fileId, file.getInputStream(), objectMetadata);
 			LOGGER.info("file uploaded Ended s3 {}",file.getOriginalFilename());
 			
 			}
 		
-		catch (SdkClientException | IOException e) {
-		//catch (Exception e) {
+		//catch (SdkClientException | IOException e) {
+		catch (Exception e) {
 		LOGGER.error("Exception occred file uploading into s3",e);
 		//	throw new Exception(e);
 		}
@@ -240,10 +238,10 @@ public class S3FileUpload  implements FileUpload {
 
 
 	@Override
-	public List<Fileinfo> getAllFiles() {
+	public List<Fileinfo> getAllFiles(String pnr,String tuid) {
 		Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
-		attributeValues.put(TUID_VALUE, new AttributeValue("\"TU101\""));
-		attributeValues.put(PNR_VALUE, new AttributeValue().withS("\"PN101\""));
+		attributeValues.put(TUID_VALUE, new AttributeValue(tuid));
+		attributeValues.put(PNR_VALUE, new AttributeValue().withS(pnr));
 
 		Map<String, String> attributeNames = new HashMap<String, String>();
 		attributeNames.put("#key1", PARTION_KEY_PARAM_NAME);
