@@ -154,7 +154,7 @@ public static AmazonDynamoDB createClinent() {
 	
 	
 	
-	return client2;
+	return client;
 }
    
    public static void deleteTable(String tableName,AmazonDynamoDB client) {
