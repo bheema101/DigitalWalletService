@@ -21,12 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -88,12 +83,12 @@ public class DigitalWalletController {
 				HttpStatus.OK);
 	}
 
-	
-	
-	
-	@RequestMapping("/getAllFiles")
-	public List<Fileinfo> getallFilesNames() {
-		 List<String> fileNames = new ArrayList<String>();
+
+
+
+	@GetMapping("/getAllFiles/{pnr}/{tuid}")
+	public List<Fileinfo> getAllFilesNames(@PathVariable String pnr, @PathVariable String tuid) {
+		List<String> fileNames = new ArrayList<String>();
 	       
 		 	
 	     /*   ObjectListing listObjects = s3client.listObjects(bucketName);
@@ -102,7 +97,7 @@ public class DigitalWalletController {
 	        	fileNames.add(os.getKey());
 	        }*/
 		 	
-			return fileuploadservice.getAllFiles();
+			return fileuploadservice.getAllFiles(pnr,tuid);
 	}
 	
 	@RequestMapping("/fileResource")

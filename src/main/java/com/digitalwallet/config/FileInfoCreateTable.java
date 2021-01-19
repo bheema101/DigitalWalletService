@@ -43,8 +43,8 @@ public class FileInfoCreateTable {
 
         DynamoDB dynamoDB = new DynamoDB(client);
 
-        String tableName = "Fileinfo";
-     //   deleteTable(tableName,client);
+        String tableName = "User_Files";
+     // deleteTable(tableName,client);
       createTable(dynamoDB, tableName);
 
     }

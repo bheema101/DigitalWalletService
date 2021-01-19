@@ -11,10 +11,11 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperFieldModel.D
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTyped;
+import com.amazonaws.services.dynamodbv2.datamodeling.JsonMarshaller;
 import com.digitalwallet.converter.LocalDateTimeToStringTypeConverter;
 import com.digitalwallet.converter.SetConverter;
 
-@DynamoDBTable(tableName = "Fileinfo")
+@DynamoDBTable(tableName = "User_Files")
 public final class Fileinfo implements Serializable{
 
 	
@@ -25,7 +26,6 @@ public final class Fileinfo implements Serializable{
 	private String id;
     private String tuid;
     @DynamoDBTypeConverted(converter = SetConverter.class)
-    @DynamoDBTyped(DynamoDBAttributeType.S)
     private Set<String> fileNames;
     private String pnr;
     private String tripId;
@@ -87,6 +87,7 @@ public final class Fileinfo implements Serializable{
 	public void setUploadedTime(LocalDateTime uploadedTime) {
 		this.uploadedTime = uploadedTime;
 	}
+	
 	@DynamoDBAttribute(attributeName = "fileNames")
 	public Set<String> getFileNames() {
 		return fileNames;
@@ -94,7 +95,6 @@ public final class Fileinfo implements Serializable{
 	public void setFileNames(Set<String> fileNames) {
 		this.fileNames = fileNames;
 	}
-    
     
     
     

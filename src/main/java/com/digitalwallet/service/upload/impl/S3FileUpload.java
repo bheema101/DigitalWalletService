@@ -127,7 +127,7 @@ public class S3FileUpload  implements FileUpload {
 	
 	
 	public String saveinDynomoDB(InputFileinfo inputFile) {
-		Fileinfo allFilesBytuidPnr = getAllFilesBytuidPnr();
+		Fileinfo allFilesBytuidPnr = getAllFilesByTuidPnr(inputFile.getTuid(),inputFile.getPnr());
 		String fileid = "";
 		if(allFilesBytuidPnr == null) {
 			Set<String> fileNames = new HashSet<>();
@@ -270,7 +270,7 @@ public class S3FileUpload  implements FileUpload {
 	
 	private  UpdateItemRequest createUpdateItemRequest(String fileidKey,Set<String> fileNames) {
         UpdateItemRequest updateItemRequest = new UpdateItemRequest();
-        updateItemRequest.setTableName("Fileinfo");
+        updateItemRequest.setTableName("User_Files");
         updateItemRequest.setKey(getKey(fileidKey));
       //  String updateExpression = "SET fileNames =:" +FILE_NAMES_VALUES;
         String updateExpression = "SET #2e830 = :2e830";
@@ -308,10 +308,10 @@ public class S3FileUpload  implements FileUpload {
 
 
 	@Override
-	public List<Fileinfo> getAllFiles() {
+	public List<Fileinfo> getAllFiles(String pnr,String tuid) {
 		Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
-		attributeValues.put(TUID_VALUE, new AttributeValue("\"TU101\""));
-		attributeValues.put(PNR_VALUE, new AttributeValue().withS("\"PN101\""));
+		attributeValues.put(TUID_VALUE, new AttributeValue(tuid));
+		attributeValues.put(PNR_VALUE, new AttributeValue().withS(pnr));
 
 		Map<String, String> attributeNames = new HashMap<String, String>();
 		attributeNames.put("#key1", PARTION_KEY_PARAM_NAME);
@@ -334,10 +334,10 @@ public class S3FileUpload  implements FileUpload {
 	}
 	
 	//@Override
-	public Fileinfo getAllFilesBytuidPnr() {
+	public Fileinfo getAllFilesByTuidPnr(String tuid,String pnr) {
 		Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
-		attributeValues.put(TUID_VALUE, new AttributeValue("TU101"));
-		attributeValues.put(PNR_VALUE, new AttributeValue().withS("PN101"));
+		attributeValues.put(TUID_VALUE, new AttributeValue(tuid));
+		attributeValues.put(PNR_VALUE, new AttributeValue().withS(pnr));
 
 		Map<String, String> attributeNames = new HashMap<String, String>();
 		attributeNames.put("#key1", PARTION_KEY_PARAM_NAME);
