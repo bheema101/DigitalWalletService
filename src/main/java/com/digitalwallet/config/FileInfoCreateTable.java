@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
@@ -26,6 +29,7 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.digitalwallet.service.upload.impl.S3FileUpload;
+import com.digitalwallet.util.Constants;
 
 @Service
 public class FileInfoCreateTable {
@@ -43,7 +47,7 @@ public class FileInfoCreateTable {
 
         DynamoDB dynamoDB = new DynamoDB(client);
 
-        String tableName = "User_Files";
+        String tableName = Constants.TABLE_NAME;
      // deleteTable(tableName,client);
       createTable(dynamoDB, tableName);
 
@@ -56,13 +60,13 @@ public class FileInfoCreateTable {
 		   //System.out.println("Table already created ");
 		   LOGGER.info("the table was created alreday : {} ",tableName);
 	   }else {
-		   createTable1(dynamoDB, tableName);
+		   formTable(dynamoDB, tableName);
 	   }
    }
 
    
    
-public static void createTable1(DynamoDB dynamoDB, String tableName) {
+public static void formTable(DynamoDB dynamoDB, String tableName) {
 	try {
 	    //System.out.println("Attempting to create table; please wait...");	 
 		
@@ -117,7 +121,7 @@ public static  boolean isTableExist(String tableName,DynamoDB dynamoDB) {
 
 
 public static AmazonDynamoDB createClinent() {
-	/*AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(new AWSCredentialsProvider() {
+	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(new AWSCredentialsProvider() {
 		
 		@Override
 		public void refresh() {
@@ -133,15 +137,15 @@ public static AmazonDynamoDB createClinent() {
 	})
 	        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:1234", "us-east-1"))
 	        .build();
-	*/
 	
 	
-	AmazonDynamoDB client2 = new AmazonDynamoDBClient(new BasicAWSCredentials(
-	         "dummykey", "dummysecertkey"));
-    //.standard().withCredentials()
-    if (!StringUtils.isEmpty("http://localhost:1234")) {
-    	client2.setEndpoint("http://localhost:1234");
-    }
+	
+	/*
+	 * AmazonDynamoDB client2 = new AmazonDynamoDBClient(new BasicAWSCredentials(
+	 * "dummykey", "dummysecertkey")); //.standard().withCredentials() if
+	 * (!StringUtils.isEmpty("http://localhost:1234")) {
+	 * client2.setEndpoint("http://localhost:1234"); }
+	 */
    // client2.setRegion(Region.getRegion(Regions.US_EAST_1));
     
    // return client;

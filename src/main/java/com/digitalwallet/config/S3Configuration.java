@@ -10,14 +10,16 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 @Configuration
-@EnableDynamoDBRepositories(basePackages = "com.digitalwallet.service.upload.impl")
+//@EnableDynamoDBRepositories(basePackages = "com.digitalwallet.service.upload.impl")
 
 public class S3Configuration {
 
@@ -71,21 +73,21 @@ public class S3Configuration {
 	    
 	    return amazonDynamoDB;
 	    */
-	  /*  AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(getAWSCredentialsProvider())
+	    AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(getAWSCredentialsProvider())
 	            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:1234", "us-east-1"))
 	            .build();
 	    
-	    return client;*/
-    	
-    	AmazonDynamoDB client = new AmazonDynamoDBClient(new BasicAWSCredentials(
-    			"dummykey", "dummysecertkey"));
-	    //.standard().withCredentials()
-	    if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
-	    	client.setEndpoint(amazonDynamoDBEndpoint);
-	    }
-	  // client.setRegion(Region.getRegion(Regions.US_EAST_1));
-	    
 	    return client;
+    	
+		/*
+		 * AmazonDynamoDB client = new AmazonDynamoDBClient(new BasicAWSCredentials(
+		 * "dummykey", "dummysecertkey")); //.standard().withCredentials() if
+		 * (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
+		 * client.setEndpoint(amazonDynamoDBEndpoint); } //
+		 * client.setRegion(Region.getRegion(Regions.US_EAST_1));
+		 * 
+		 * return client;
+		 */
 	}
 
     

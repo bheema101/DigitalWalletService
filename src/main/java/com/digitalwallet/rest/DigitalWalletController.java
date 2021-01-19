@@ -88,20 +88,11 @@ public class DigitalWalletController {
 
 	@GetMapping("/getAllFiles/{pnr}/{tuid}")
 	public List<Fileinfo> getAllFilesNames(@PathVariable String pnr, @PathVariable String tuid) {
-		List<String> fileNames = new ArrayList<String>();
-	       
-		 	
-	     /*   ObjectListing listObjects = s3client.listObjects(bucketName);
-	        List<S3ObjectSummary> objectSummaries = listObjects.getObjectSummaries();
-	        for(S3ObjectSummary os :objectSummaries) {
-	        	fileNames.add(os.getKey());
-	        }*/
-		 	
+			LOGGER.info("startred getAllfiles with pnr {} tuid {}",pnr,tuid);
 			return fileuploadservice.getAllFiles(pnr,tuid);
 	}
 	
 	@RequestMapping("/fileResource")
-	
 	public ResponseEntity<Resource>  downloadFileSource(HttpServletRequest request2, HttpServletResponse response,
 			@RequestParam(name = "fileName") String fileName)  {
 		ResponseEntity<Resource> resoponse = null;
@@ -141,10 +132,7 @@ public class DigitalWalletController {
 	}
 	
 	
-	@RequestMapping("getdynomoDB")
-	public  ResponseEntity<Fileinfo> findBy( @RequestParam("fileName")String fileName) {
-		return ResponseEntity.ok(fileuploadservice.findBy(fileName));
-	}
+	
 	
 	
 	@RequestMapping(value = "/query")

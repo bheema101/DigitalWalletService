@@ -1,11 +1,13 @@
 package com.digitalwallet.service.upload.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +27,14 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Index;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
@@ -37,20 +47,34 @@ import com.amazonaws.services.dynamodbv2.model.ProjectionType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
+import com.amazonaws.services.dynamodbv2.model.UpdateItemResult;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.util.json.Jackson;
 import com.digitalwallet.config.FileInfoCreateTable;
+import com.digitalwallet.converter.LocalDateTimeDeserializer;
+import com.digitalwallet.converter.LocalDateTimeSerializer;
 import com.digitalwallet.model.Fileinfo;
 import com.digitalwallet.model.FormWrapper;
 import com.digitalwallet.model.InputFileinfo;
 import com.digitalwallet.service.upload.FileUpload;
+import com.digitalwallet.util.Constants;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 @Service
 public class S3FileUpload  implements FileUpload {
 	
-	private static final String FILE_NAMES_VALUES = "fileNamesValues";
+	private static final String ID = "id";
+
+	private static final String FILE_NAMES_VALUES = ":fileNamesValues";
 
 	private static final String SORT_KEY_PARAM_NAME = "pnr";
+	private static final String UPDATE_KEY_PARAM_NAME = "fileNames";
 
 	private static final String PARTION_KEY_PARAM_NAME = "tuid";
 
@@ -78,8 +102,7 @@ public class S3FileUpload  implements FileUpload {
 	
 	private DynamoDBMapper dynamoDBMapper;
 	
-	@Autowired
-	FileRepository fileRepository;
+	
 	
 
 	@Override
@@ -127,41 +150,38 @@ public class S3FileUpload  implements FileUpload {
 	
 	
 	public String saveinDynomoDB(InputFileinfo inputFile) {
-		Fileinfo allFilesBytuidPnr = getAllFilesByTuidPnr(inputFile.getTuid(),inputFile.getPnr());
-		String fileid = "";
-		if(allFilesBytuidPnr == null) {
+		String fileId = "";
+		List<Fileinfo> files =  getAllFiles(inputFile.getPnr(),inputFile.getTuid());
+		if(files !=null && files.size()>0) {
+			Fileinfo fileAgainstPnrTuid = files.get(0);
+			if(fileAgainstPnrTuid != null) {
+				Set<String> fileNames = Optional.ofNullable(fileAgainstPnrTuid.getFileNames()).orElse(new HashSet<>());
+				if(fileNames != null && fileNames.size() >0) {
+					fileId = fileAgainstPnrTuid.getId();
+					fileNames.add(inputFile.getFileName());
+					UpdateItemRequest createUpdateItemRequest = createUpdateItemRequest(fileId,fileAgainstPnrTuid.getFileNames());
+					try {
+						amazonDynamoDB.updateItem(createUpdateItemRequest);
+					} catch (Exception e) {
+						LOGGER.error("Exception occured while adding file against existing pnr and tuid  withid {}",fileId);
+					}
+				}
+			}
+
+
+		}else {
 			Set<String> fileNames = new HashSet<>();
 			fileNames.add(inputFile.getFileName());
 			Fileinfo fileinfo = new Fileinfo(inputFile.getTuid(), fileNames, inputFile.getPnr(), inputFile.getTripId(), LocalDateTime.now());
 			LOGGER.info("File savinginto DynomoDB statated ");
 			dynamoDBMapper = new  DynamoDBMapper(amazonDynamoDB);
 			dynamoDBMapper.save(fileinfo);
-			fileid= fileinfo.getId();
-			// dynamoDBMapper.
+			fileId= fileinfo.getId();
 			LOGGER.info("File savinginto DynomoDB Ended ");
-		} else {
-			Set<String> fileNames = Optional.ofNullable(allFilesBytuidPnr.getFileNames()).orElse(new HashSet<>());
-			if(fileNames != null && fileNames.size() >0) {
-				fileNames.add(inputFile.getFileName());
-				UpdateItemRequest createUpdateItemRequest = createUpdateItemRequest(allFilesBytuidPnr.getId(),allFilesBytuidPnr.getFileNames());
-				amazonDynamoDB.updateItem(createUpdateItemRequest);
-			}
-
+			
 		}
 		
-		
-		
-		
-		/*else {
-			UpdateItemRequest  updateitemrequest = new UpdateItemRequest();
-			updateitemrequest.setTableName("Fileinfo");
-			updateitemrequest.setv
-			//updateitemrequest.setConditionExpression();
-		}*/
-		
-		
-		
-		return fileid;
+		return fileId;
 
 	}
 
@@ -210,20 +230,7 @@ public class S3FileUpload  implements FileUpload {
 	}
 	
 	
-	public  Fileinfo findBy(String fileName) {
-		
-		Iterable<Fileinfo> findById = fileRepository.findAll();
-		Fileinfo fileInfo = null;
-		
-		for(Fileinfo x : findById){
-		//	LOGGER.info("fileName :"+x.getFileName()+"id :"+x.getId());
-			fileInfo =x;
-		};
-		
-		//Fileinfo findById2 = fileRepository.findById(fileName).get();
-		
-		return fileInfo;
-	}
+	
 	
 	
 	
@@ -261,7 +268,7 @@ public class S3FileUpload  implements FileUpload {
 	public void uploadfile(MultipartFile file, FormWrapper formWrapper) throws Exception {
 		LOGGER.info("file uploaded uploaded startred");
 		DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
-		tableCreatror.createTable(dynamoDB, "Fileinfo");
+		tableCreatror.createTable(dynamoDB, Constants.TABLE_NAME);
 		String fileId =saveinDynomoDB(new InputFileinfo(formWrapper.getTuid(),file.getOriginalFilename(),formWrapper.getPnr(),formWrapper.getTripid(),LocalDateTime.now()));
 		//saveintoS3(file,fileId);
 		LOGGER.info("file uploaded uploaded Ended");
@@ -270,94 +277,74 @@ public class S3FileUpload  implements FileUpload {
 	
 	private  UpdateItemRequest createUpdateItemRequest(String fileidKey,Set<String> fileNames) {
         UpdateItemRequest updateItemRequest = new UpdateItemRequest();
-        updateItemRequest.setTableName("User_Files");
+        updateItemRequest.setTableName(Constants.TABLE_NAME);
         updateItemRequest.setKey(getKey(fileidKey));
-      //  String updateExpression = "SET fileNames =:" +FILE_NAMES_VALUES;
-        String updateExpression = "SET #2e830 = :2e830";
+       // String updateExpression = "SET #"+ UPDATE_KEY_PARAM_NAME +"="+FILE_NAMES_VALUES;
+        String updateExpression = "SET fileNames = "+FILE_NAMES_VALUES;
         updateItemRequest.setUpdateExpression(updateExpression);
-        updateItemRequest.setExpressionAttributeNames(getExpressionAttributeNames());
+       // updateItemRequest.setExpressionAttributeNames(getExpressionAttributeNames());
         updateItemRequest.setExpressionAttributeValues(getExpressionAttributeValues(fileNames));
         return updateItemRequest;
     }
 	
 	 private static Map<String, AttributeValue> getKey(String fileidKey) {
 	        Map<String, AttributeValue> key = new HashMap<String, AttributeValue>(); 
-	        key.put("id", new AttributeValue(fileidKey));
+	        key.put(ID, new AttributeValue(fileidKey));
 	        return key;
 	    }
 	 
 	 private static Map<String, String> getExpressionAttributeNames() {
 	        Map<String, String> expressionAttributeNames = new HashMap<String, String>(); 
-	        expressionAttributeNames.put("#2e830", "fileNames");
+	        expressionAttributeNames.put("#"+UPDATE_KEY_PARAM_NAME,UPDATE_KEY_PARAM_NAME);
 	        return expressionAttributeNames;
 	    }
 
 	    private static Map<String, AttributeValue> getExpressionAttributeValues(Set<String> fileNames) {
 	    	 String[] fileanamesarray = fileNames.stream().toArray(String[] ::new);
 	        Map<String, AttributeValue> expressionAttributeValues = new HashMap<String, AttributeValue>(); 
-	        expressionAttributeValues.put(":2e830",new AttributeValue().withSS(fileanamesarray));
+	        expressionAttributeValues.put(FILE_NAMES_VALUES,new AttributeValue().withSS(fileanamesarray));
 	        return expressionAttributeValues;
 	    }
 	
 	
-	public Fileinfo getfiindByid(String id) {
-		return  fileRepository.findById(id).get();
 		
-	}
-
 
 
 	@Override
 	public List<Fileinfo> getAllFiles(String pnr,String tuid) {
-		Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
-		attributeValues.put(TUID_VALUE, new AttributeValue(tuid));
-		attributeValues.put(PNR_VALUE, new AttributeValue().withS(pnr));
+
 
 		Map<String, String> attributeNames = new HashMap<String, String>();
 		attributeNames.put("#key1", PARTION_KEY_PARAM_NAME);
 		attributeNames.put("#key2", SORT_KEY_PARAM_NAME);
 
 
-		DynamoDBQueryExpression<Fileinfo> queryExpression = new DynamoDBQueryExpression<Fileinfo>()
-				.withIndexName(GLOBAL_INDEX_NAME)
+		PaginatedQueryList<Fileinfo> files= null;
+
+		Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
+		attributeValues.put(TUID_VALUE, new AttributeValue(tuid));
+		attributeValues.put(PNR_VALUE, new AttributeValue().withS(pnr));
+
+
+		DynamoDBQueryExpression<Fileinfo> queryExpression = new
+				DynamoDBQueryExpression<Fileinfo>() .withIndexName(GLOBAL_INDEX_NAME)
 				.withExpressionAttributeValues(attributeValues)
 				.withExpressionAttributeNames(attributeNames)
 				.withKeyConditionExpression("#key1 = "+TUID_VALUE+" and #key2 ="+PNR_VALUE)
-				.withConsistentRead(false);
-		DynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
-		PaginatedQueryList<Fileinfo> files = mapper.query(Fileinfo.class, queryExpression);
+				.withConsistentRead(false); DynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB); 
+				files =mapper.query(Fileinfo.class, queryExpression);
+				try {
+					List<String> fileIds =
+							files.stream().map(Fileinfo::getId).collect(Collectors.toList());
+					LOGGER.info("getAllfileids  : {}",fileIds);
+				} catch (Exception e) {
+					LOGGER.error("Exception occured while invoking getAllfiles with pnr {} and tuid {}",pnr,tuid);
+				}
 
-		List<String> fileIds = files.stream().map(Fileinfo::getId).collect(Collectors.toList());
-		LOGGER.info("filed ids : {}",fileIds);
 
-		return files;
+
+				return files;
 	}
 	
-	//@Override
-	public Fileinfo getAllFilesByTuidPnr(String tuid,String pnr) {
-		Map<String, AttributeValue> attributeValues = new HashMap<String, AttributeValue>();
-		attributeValues.put(TUID_VALUE, new AttributeValue(tuid));
-		attributeValues.put(PNR_VALUE, new AttributeValue().withS(pnr));
-
-		Map<String, String> attributeNames = new HashMap<String, String>();
-		attributeNames.put("#key1", PARTION_KEY_PARAM_NAME);
-		attributeNames.put("#key2", SORT_KEY_PARAM_NAME);
-
-
-		DynamoDBQueryExpression<Fileinfo> queryExpression = new DynamoDBQueryExpression<Fileinfo>()
-				.withIndexName(GLOBAL_INDEX_NAME)
-				.withExpressionAttributeValues(attributeValues)
-				.withExpressionAttributeNames(attributeNames)
-				.withKeyConditionExpression("#key1 = "+TUID_VALUE+" and #key2 ="+PNR_VALUE)
-				.withConsistentRead(false);
-		DynamoDBMapper mapper = new DynamoDBMapper(amazonDynamoDB);
-		PaginatedQueryList<Fileinfo> files = mapper.query(Fileinfo.class, queryExpression);
-
-		List<String> fileIds = files.stream().map(Fileinfo::getId).collect(Collectors.toList());
-		LOGGER.info("filed ids : {}",fileIds);
-
-		return files.size() >0  ? files.get(0) : null;
-	}
-
-
+	
 }
