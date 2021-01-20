@@ -5,18 +5,21 @@ import "./Demo.css";
 
 class DragNDrop extends Component {
   state = {
-    files: []
+    id: "",
+    files: [],
   };
-  ngrok_url = "http://3bd881ab1550.ngrok.io";
+  base_url = "https://localhost/dws";
   componentDidMount() {
     //getAllFiles
     console.log("Mounted");
     axios({
       method: "get",
-      url: `${this.ngrok_url}/getAllFiles`,
+      url: `${this.base_url}/getAllFiles/PN101/TU102`,
     })
       .then((response) => {
-        this.setState({files: [...response.data]});
+        const data = response.data[0]
+        console.log(response);
+        this.setState({ files: data.fileNames, id: data.id });
       })
       .catch((err) => console.log(err));
   }
@@ -25,12 +28,12 @@ class DragNDrop extends Component {
     console.log(files[0]);
     const formdata = new FormData();
     formdata.append("file", files[0]);
-    formdata.append("tuid", "ABCD");
-    formdata.append("tripid", "1234");
-    formdata.append("pnr", "123-4567890");
+    formdata.append("tuid", "TU102");
+    formdata.append("tripid", "TRIP101");
+    formdata.append("pnr", "PN101");
     axios({
       method: "post",
-      url: `${this.ngrok_url}/uploadfilewithdata`,
+      url: `${this.base_url}/uploadfilewithdata`,
       data: formdata,
       headers: { "Content-Type": "multipart/form-data" },
     })
@@ -38,13 +41,12 @@ class DragNDrop extends Component {
         console.log("File uploaded successfully");
         axios({
           method: "get",
-          url: `${this.ngrok_url}/getAllFiles`,
+          url: `${this.base_url}/getAllFiles/PN101/TU102`,
         })
           .then((response) => {
-            this.setState({files : [...response.data]});
+            this.setState({ files: [...response.data[0].fileNames] });
           })
           .catch((err) => console.log(err));
-        
       })
       .catch((err) => console.log(err));
   };
@@ -55,19 +57,18 @@ class DragNDrop extends Component {
         <h1>Digital Wallet Demo</h1>
         <div>
           <FileDrop onDrop={(files, event) => this.onDropFile(files, event)}>
-            {this.state.files.length > 0 ? (
-              this.state.files.map((file) => (
-                <a
-                  href={`${this.ngrok_url}/fileResource?fileName=${file}`}
-                  key={file}
-                >
-                  {file}
-                  <br/>
-                </a>
-              ))
-            ) : (
-              `Drop some files here!`
-            )}
+
+            {this.state.files.length > 0
+              ? this.state.files.map((file) => (
+                  <a
+                    href={`${this.base_url}/download?fileId=${this.state.id}&fileName=${file}`}
+                    key={file}
+                  >
+                    {file}
+                    <br />
+                  </a>
+                ))
+              : `Drop some files here!`}
           </FileDrop>
         </div>
       </div>
