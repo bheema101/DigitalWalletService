@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.digitalwallet.excption.FileExistsExcption;
 import com.digitalwallet.model.Fileinfo;
 import com.digitalwallet.model.FormWrapper;
 import com.digitalwallet.service.download.FileDownload;
@@ -32,7 +33,7 @@ import com.digitalwallet.service.download.impl.Queryinvoker;
 import com.digitalwallet.service.upload.FileUpload;
 
 @RestController
-//@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")
 public class DigitalWalletController {
 
 
@@ -106,6 +107,17 @@ public class DigitalWalletController {
 	}
 	
 	
+	@RequestMapping("/download")
+	public ResponseEntity<Resource>  downloadFileSource(@RequestParam(name = "fileId") String fileId,@RequestParam(name = "fileName") String fileName)  {
+		ResponseEntity<Resource> resoponse = null;
+		try {
+			resoponse =fileDownloadServie.download(fileId,fileName);
+		}catch (Exception e) {
+			LOGGER.error("Excption occured while file downloading from s3:",e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return 	resoponse;	
+	}
 	
 	
 	@RequestMapping("/readfromlocal")
@@ -162,7 +174,11 @@ public class DigitalWalletController {
 				
 				fileuploadservice.uploadfile(file,formWrapper);
 			} catch (Exception e) {
-				LOGGER.error("Exception occred while uploading file {} ",file.getOriginalFilename(),e);
+				if(e instanceof FileExistsExcption) {
+					LOGGER.error("the file already exists with this this name : {} ",formWrapper.getFile().getOriginalFilename());
+					return new ResponseEntity<>(e.getMessage(),HttpStatus.UNPROCESSABLE_ENTITY);
+				}
+				LOGGER.error("Exception occred while uploading file : {} ",file.getOriginalFilename(),e);
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 			LOGGER.info("file {} upload Ended...",file.getOriginalFilename());

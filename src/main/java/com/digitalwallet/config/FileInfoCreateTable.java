@@ -48,8 +48,9 @@ public class FileInfoCreateTable {
         DynamoDB dynamoDB = new DynamoDB(client);
 
         String tableName = Constants.TABLE_NAME;
+        
      // deleteTable(tableName,client);
-      createTable(dynamoDB, tableName);
+     createTable(dynamoDB, tableName);
 
     }
 

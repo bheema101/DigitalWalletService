@@ -16,8 +16,10 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.Base64;
 import com.amazonaws.util.IOUtils;
 import com.digitalwallet.service.download.FileDownload;
+import com.digitalwallet.util.Util;
 
 @Service
 public class S3FileDownlLoad implements FileDownload {
@@ -50,6 +52,27 @@ public class S3FileDownlLoad implements FileDownload {
 	            .contentLength(resource.contentLength())
 	            .body(resource);
 	}
+	
+	public ResponseEntity<Resource> download(String fileId,String fileName) throws IOException {
+		fileId = fileId.concat(Util.encode(fileName));
+		S3Object s3Object = s3client.getObject("digitalwallet", fileId);
+		S3ObjectInputStream inputStream = s3Object.getObjectContent();
+		//inputStream.
+		byte[] byteArray = IOUtils.toByteArray(inputStream);
+		String mimeType = URLConnection.guessContentTypeFromName(fileName);
+		if (mimeType == null) {
+			//unknown mimetype so set the mimetype to application/octet-stream
+			mimeType = "application/octet-stream";
+		}
+		
+		HttpHeaders headers = createHttpHeaders(fileName, mimeType);
+        ByteArrayResource resource = new ByteArrayResource(byteArray,fileName);
+        
+        return ResponseEntity.ok()
+	            .headers(headers)
+	            .contentLength(resource.contentLength())
+	            .body(resource);
+	}
 
 
 	private HttpHeaders createHttpHeaders(String fileName, String mimeType) {
@@ -65,4 +88,11 @@ public class S3FileDownlLoad implements FileDownload {
 	
 	
 
+	
+	
+	public static void main(String[] args) {
+		S3FileDownlLoad fd = new S3FileDownlLoad();
+	//	String decode = fd.decode("demo.txt");
+		//System.err.println(decode);
+	}
 }
