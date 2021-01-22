@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 public interface FileDownload {
 	public ResponseEntity<Resource> download(String fileName) throws IOException;
-	public ResponseEntity<Resource> download(String fileId,String fileName) throws IOException;
+	public ResponseEntity<Resource> download(String fileId,String fileName,String tuid) throws IOException;
 	
 }

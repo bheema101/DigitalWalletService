@@ -53,9 +53,10 @@ public class S3FileDownlLoad implements FileDownload {
 	            .body(resource);
 	}
 	
-	public ResponseEntity<Resource> download(String fileId,String fileName) throws IOException {
+	public ResponseEntity<Resource> download(String fileId,String fileName,String tuid) throws IOException {
 		fileId = fileId.concat(Util.encode(fileName));
-		S3Object s3Object = s3client.getObject("digitalwallet", fileId);
+		String path = String.format("%s/%s", bucketName,tuid);
+		S3Object s3Object = s3client.getObject(path, fileId);
 		S3ObjectInputStream inputStream = s3Object.getObjectContent();
 		//inputStream.
 		byte[] byteArray = IOUtils.toByteArray(inputStream);

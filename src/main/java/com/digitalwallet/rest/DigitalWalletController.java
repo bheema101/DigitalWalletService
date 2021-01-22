@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.digitalwallet.excption.FileExistsExcption;
+import com.digitalwallet.model.DownloadReq;
 import com.digitalwallet.model.Fileinfo;
 import com.digitalwallet.model.FormWrapper;
 import com.digitalwallet.service.download.FileDownload;
@@ -107,11 +108,25 @@ public class DigitalWalletController {
 	}
 	
 	
-	@RequestMapping("/download")
-	public ResponseEntity<Resource>  downloadFileSource(@RequestParam(name = "fileId") String fileId,@RequestParam(name = "fileName") String fileName)  {
+	@RequestMapping("/download2")
+	public ResponseEntity<Resource>  downloadFileSource(@RequestParam(name = "fileId") String fileId,
+			@RequestParam(name = "fileName") String fileName,@RequestParam(name = "tuid") String tuid)  {
 		ResponseEntity<Resource> resoponse = null;
 		try {
-			resoponse =fileDownloadServie.download(fileId,fileName);
+			resoponse =fileDownloadServie.download(fileId,fileName,tuid);
+		}catch (Exception e) {
+			LOGGER.error("Excption occured while file downloading from s3:",e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return 	resoponse;	
+	}
+	
+	
+	@RequestMapping( value = "/download",method =  {RequestMethod.POST})
+	public ResponseEntity<Resource>  downloadFileSource2(@RequestBody DownloadReq dowreq)  {
+		ResponseEntity<Resource> resoponse = null;
+		try {
+			resoponse =fileDownloadServie.download(dowreq.getFileId(),dowreq.getFileName(),dowreq.getTuid());
 		}catch (Exception e) {
 			LOGGER.error("Excption occured while file downloading from s3:",e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

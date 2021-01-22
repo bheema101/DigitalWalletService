@@ -235,7 +235,7 @@ public class S3FileUpload implements FileUpload {
 		// return TableUtils.createTableIfNotExists(amazonDynamoDB, tableRequest);
 	}
 
-	public void saveintoS3(MultipartFile file, String fileId) {
+	public void saveintoS3(MultipartFile file, String tuid,String fileId) {
 
 		if (!file.isEmpty()) {
 			Map<String, String> metadata = new HashMap<>();
@@ -245,7 +245,7 @@ public class S3FileUpload implements FileUpload {
 			metadata.put("file Size", String.valueOf(file.getSize()));
 			objectMetadata.setUserMetadata(metadata);
 			objectMetadata.setContentLength(file.getSize());
-			String path = String.format("%s", bucketName);
+			String path = String.format("%s/%s", bucketName,tuid);
 			try {
 				LOGGER.info("file uploaded into s3 started {} ", file.getOriginalFilename());
 				s3client.putObject(path, fileId, file.getInputStream(), objectMetadata);
@@ -269,7 +269,7 @@ public class S3FileUpload implements FileUpload {
 		tableCreatror.createTable(dynamoDB, Constants.TABLE_NAME);
 		String fileId = saveinDynomoDB(new InputFileinfo(formWrapper.getTuid(), file.getOriginalFilename(),
 				formWrapper.getPnr(), formWrapper.getTripid(), LocalDateTime.now()));
-		saveintoS3(file, fileId);
+		saveintoS3(file,formWrapper.getTuid(), fileId);
 		LOGGER.info("file uploaded uploaded Ended");
 	}
 
