@@ -74,7 +74,7 @@ public class S3Configuration {
 	    return amazonDynamoDB;
 	    */
 	    AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withCredentials(getAWSCredentialsProvider())
-	            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:1234", "us-east-1"))
+	            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("https://dynamodb.ap-south-1.amazonaws.com", "ap-south-1"))
 	            .build();
 	    
 	    return client;
@@ -113,7 +113,7 @@ public class S3Configuration {
     @Bean
     public AWSCredentials amazonAWSCredentials() {
         return new BasicAWSCredentials(
-          amazonAWSAccessKey, amazonAWSSecretKey);
+          accessKey, storAccessKey);
     }
 
 }
