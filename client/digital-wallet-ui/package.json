@@ -12,10 +12,13 @@
     "fs-react": "^0.0.4",
     "js-file-download": "^0.4.12",
     "magic-number": "^0.1.6",
+    "pdf-viewer-reactjs": "^2.2.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-file-drop": "^3.1.2",
+    "react-modal-sheet": "^1.2.0",
     "react-scripts": "4.0.1",
+    "reactjs-popup": "^2.0.4",
     "transform-loader": "^0.2.4",
     "web-vitals": "^0.2.4"
   },
